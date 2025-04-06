@@ -1,7 +1,9 @@
 {
   "$GMObject":"",
   "%Name":"obstart",
-  "eventList":[],
+  "eventList":[
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":4,"eventType":6,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+  ],
   "managed":true,
   "name":"obstart",
   "overriddenProperties":[],
