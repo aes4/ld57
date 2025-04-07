@@ -1,13 +1,15 @@
 {
   "$GMObject":"",
-  "%Name":"oplayer",
-  "eventList":[],
+  "%Name":"owire",
+  "eventList":[
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+  ],
   "managed":true,
-  "name":"oplayer",
+  "name":"owire",
   "overriddenProperties":[],
   "parent":{
-    "name":"brokenobjs",
-    "path":"folders/Objects/brokenobjs.yy",
+    "name":"Objects",
+    "path":"folders/Objects.yy",
   },
   "parentObjectId":null,
   "persistent":false,
@@ -27,7 +29,10 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
+  "spriteId":{
+    "name":"sw0",
+    "path":"sprites/sw0/sw0.yy",
+  },
   "spriteMaskId":null,
   "visible":true,
 }

@@ -1,11 +1,9 @@
 {
   "$GMObject":"",
-  "%Name":"odrill",
-  "eventList":[
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
-  ],
+  "%Name":"oi",
+  "eventList":[],
   "managed":true,
-  "name":"odrill",
+  "name":"oi",
   "overriddenProperties":[],
   "parent":{
     "name":"Objects",
@@ -30,8 +28,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"sdrill1",
-    "path":"sprites/sdrill1/sdrill1.yy",
+    "name":"si",
+    "path":"sprites/si/si.yy",
   },
   "spriteMaskId":null,
   "visible":true,
