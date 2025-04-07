@@ -14,7 +14,6 @@ function instd(obj) {  // instance_destroy obj
     instance_destroy(obj)
 }
 
-
 function pmr(o, x, y, to) {  // place_meeting_redo
     rx = x - o.x
     ry = y - o.y
@@ -23,6 +22,11 @@ function pmr(o, x, y, to) {  // place_meeting_redo
     r = o.bbox_right + rx
     b = o.bbox_bottom + ry
     return (collision_rectangle(l, t, r, b, to, false, true) != noone);
+}
+
+
+function cursordistance(x, y){  // if ok add later
+    return point_distance(x, y, mouse_x, mouse_y)
 }
 
 
@@ -82,6 +86,29 @@ function ns(n) {  // number to sprite
     return [u0, u1]; // thought i could return from the case but maybe not
 }
 
+
+function gc(map, ox, oy){  // generate client
+    /* random offset?
+    ssssss
+    seeeee
+    serece
+    ssssss
+    */
+    yo = [
+        [4, 4, 4, 4, 4, 4],
+        [4, 7, 7, 7, 7, 7],
+        [4, 7, 7, 7, 10, 7],
+        [4, 4, 4, 4, 4, 4],
+    ]
+    for (i = 0; i < array_length(yo); i++) {
+        for (ii = 0; ii < array_length(yo[0]); ii++) {
+            mapv = yo[i][ii]
+            ds_grid_set(map, ox + ii, oy + i, mapv)
+        }
+    }
+}
+
+
 if nextstep {
     for (i = 0; i < ds_grid_width(map); i++) {
         for (ii = 0; ii < ds_grid_height(map); ii++) {
@@ -92,13 +119,15 @@ if nextstep {
     instance_create_layer(px, py, "Instances", oplr)
     py -= 24
     oplr.y -= 24
+    instance_create_layer(px-halfvpw, py-halfvpw, "Instances", oinv)
+    instance_create_layer(px-halfvpw, py-halfvpw, "Instances", odraw)
     currentroom = "main"
     nextstep = false
 }
 if circle {
     oslidercircle.x = mouse_x
-    if 2942 < oslidercircle.x && oslidercircle.x < 5200 {
-        //vol = (oslidercircle.x - 2942) / (5200 - 2942)
+    if 1300 < oslidercircle.x && oslidercircle.x < 2700 {
+        //vol = (oslidercircle.x - 1300) / (2700 - 1300)
         //audio_sound_gain(aud, vol, 0)
     }
     circle = false
@@ -186,6 +215,7 @@ function side(){
         hops = true
     }
     d = sign(h)  // returns -1 or 1
+    if d != 0 { oplr.image_xscale = d }
     if pmr(oplr, px + h, py, odirt) {
         while !pmr(oplr, px + d, py, odirt) { px += d }
         h = 0
@@ -211,8 +241,159 @@ function side(){
     px += h
     py += v
 }
+if keyboard_check(ord("1")) {
+    invslot = "1"
+}
+if keyboard_check(ord("2")) {
+    invslot = "2"
+}
+if keyboard_check(ord("3")) {
+    invslot = "3"
+}
+if keyboard_check(ord("4")) {
+    invslot = "4"
+}
+if currentblock == "None" and mouse_check_button_pressed(mb_left) and cursordistance(px, py) < (320 * 1.5) and invslot == "1" {
+    currentblock = instance_position(mouse_x, mouse_y, odirt)
+    out(currentblock)
+    if currentblock == noone {
+        currentblock = instance_position(mouse_x, mouse_y, owire)
+    } else {  // autoclicker here breaks the game
+        idirt += 1
+    }
+    if currentblock == noone {
+        currentblock = instance_position(mouse_x, mouse_y, oserver)
+    } else {
+        iwire += 1
+    }
+}
+if currentblock == -4 {
+    currentblock = "None"
+}
+if currentblock != "None" {
+    breaktimer -= 1
+    if breaktimer < 0 {
+        if currentblock != noone {
+            instance_destroy(currentblock)
+            currentblock = "None"
+        }
+        breaktimer = 60*0.5
+    }
+}
+if mouse_check_button_pressed(mb_left) && place_meeting(mouse_x, mouse_y, obdirt) && invslot == "2" and cursordistance(px, py) < (320 * 1.5) and idirt > 0 {
+    idk = instance_position(mouse_x, mouse_y, obdirt)
+    instance_create_layer(idk.x, idk.y, "Instances", obdirt)
+}
+if mouse_check_button_pressed(mb_left) && invslot == "3" and cursordistance(px, py) < (320 * 1.5) and iwire > 0 {
+    idk = instance_position(mouse_x, mouse_y, obdirt)
+    out(idk)
+    if idk == -4 { idk = instance_position(mouse_x, mouse_y, obmet) }
+    out(idk)
+    idkk = instance_create_layer(idk.x, idk.y, "Instances", owire)
+    plsx = (idk.x - (px - o * 320)) div 320
+    plsy = (idk.y - (py - o * 320)) div 320
+    ds_grid_set(map, plsx, plsy, 2)
+    //map
+    // logic to make wire the right sprite, this code is so bad but I have no time to do it right
+    t = instance_position(idk.x, idk.y-(320), owire)
+    r = instance_position(idk.x+(320), idk.y, owire)
+    b = instance_position(idk.x, idk.y+(320), owire)
+    l = instance_position(idk.x-(320), idk.y, owire)
+    if !t && !r && !b && !l { idkk.sprite_index = sw0
+    } else if t && !r && !b && !l { idkk.sprite_index = swtdl  // incorrect sprite but I don't have the correct one fix later
+    } else if !t && r && !b && !l { idkk.sprite_index = swrl
+    } else if !t && !r && b && !l { idkk.sprite_index = swtdl  // same with this one
+    } else if !t && !r && !b && l { idkk.sprite_index = swrl
+    } else if !t && !r && b && l { idkk.sprite_index = swdl
+    } else if t && !r && !b && l { idkk.sprite_index = swlu  // misnamed rip me
+    } else if !t && r && b && !l { idkk.sprite_index = swrd
+    } else if t && r && !b && !l { idkk.sprite_index = swtr  // there is more but who is gonna connect more than two wires together
+    }
+}
+if mouse_check_button_pressed(mb_left) && invslot == "4" and cursordistance(px, py) < (320 * 1.5) and iserver > 0{
+    idk = instance_position(mouse_x, mouse_y, obdirt)
+    instance_create_layer(idk.x, idk.y, "Instances", oserver)
+    plsx = (idk.x - (px - o * 320)) div 320
+    plsy = (idk.y - (py - o * 320)) div 320
+    ds_grid_set(map, plsx, plsy, 3)
+}
+if bshop == true {
+    instance_create_layer(px-halfvpw, py-halfvpw, "Instances", obshop)
+    instance_create_layer(px-halfvpw, py-halfvpw, "Instances", obsell)
+    instance_create_layer(px-halfvpw, py-halfvpw, "Instances", obbuy1)
+    instance_create_layer(px-halfvpw, py-halfvpw, "Instances", obbuy2)
+    instance_create_layer(px-halfvpw, py-halfvpw, "Instances", obbuy3)
+    instance_create_layer(px-halfvpw, py-halfvpw, "Instances", obbuy4)
+    bshop = false
+}
+// here it is the gold the gameplay the brain
+// find server and set it as main
+calctime -= 1
+if calctime < 0 {
+    for (i = 0; i < 17; i++) {
+        for (ii = 0; ii < 17; ii++) {
+            if ds_grid_get(map, i, ii) == 10 or ds_grid_get(map, i, ii) == 3 {
+                mainx = i
+                mainy = ii
+                break
+            }
+        }
+        if mainx != "None" { break }
+    }
+    walk = ds_grid_create(17, 17)
+    ds_grid_set_region(walk, 0, 0, 16, 16, 0)
+
+    thing = ds_list_create()
+    ds_list_add(thing, mainx)
+    ds_list_add(thing, mainy)
+    clients = 0
+
+    while(ds_list_size(thing) > 0) {
+        ii = ds_list_find_value(thing, ds_list_size(thing) - 1); ds_list_delete(thing, ds_list_size(thing) - 1)
+        i = ds_list_find_value(thing, ds_list_size(thing) - 1); ds_list_delete(thing, ds_list_size(thing) - 1)
+        if (i < 0 || ii < 0 || i >= 17 || ii >= 17) continue
+        if (ds_grid_get(walk, i, ii)) continue
+        ds_grid_set(walk, i, ii, 1)
+        tile = ds_grid_get(map, i, ii)
+        if tile == 0 continue
+        if tile == 9 { clients += 1 }
+        if tile == 2 or tile = 8 or tile == 11 {
+            ds_list_add(thing, i + 1)
+            ds_list_add(thing, ii)
+            ds_list_add(thing, i)
+            ds_list_add(thing, ii + 1)
+            ds_list_add(thing, ii)
+            ds_list_add(thing, i)
+            ds_list_add(thing, ii - 1)
+        }
+    ds_list_destroy(thing)
+    ds_list_destroy(walk)
+    mon += clients * 15
+}
+
+if keyboard_check(ord("E")) {
+    // minimap
+}
 if currentroom == "main" {
     side()
     oplr.x = px
     oplr.y = py
+    oinv.x = px-halfvpw
+    oinv.y = py-halfvph
+    if instance_exists(obshop) {
+        obshop.x = px-halfvpw
+        obshop.y = py-halfvph
+        obsell.x = px-halfvpw
+        obsell.y = py-halfvph
+        obbuy1.x = px-halfvpw+1700
+        obbuy1.y = py-halfvph+500
+        obbuy2.x = px-halfvpw+1700
+        obbuy2.y = py-halfvph+200+500
+        obbuy3.x = px-halfvpw+1800
+        obbuy3.y = py-halfvph+800
+        obbuy3.x = px-halfvpw+1700
+        obbuy3.y = py-halfvph+80+800
+        obbuy4.x = px-halfvpw+1700
+        obbuy4.y = py-halfvph+220+800
+    }
 }

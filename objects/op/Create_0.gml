@@ -7,6 +7,22 @@ ds_grid_set_region(nmap, -8+o, -8+o, 8+o, 8+o, 0)
 map = nmap  // current map
 px = 2880
 py = 1620
+calctime = 60*15
+halfvpw=1440  // half viewport width
+halfvph=810
+breaktimer = 60*0.5  // if change here change in code
+breakanimtimer = 60*2
+currentblock = "None"
+invslot = "1"
+idirt = 0
+iwire = 50
+iserver = 0
+mon = 0
+health = 60*3
+mainx = "none"
+mainy = "none"
+clients = 0
+iii = noone
 nextstep = false
 currentroom = "mm"
 // player movement vars
@@ -44,9 +60,10 @@ ds_grid_set(map, o+8, o-2, 4)
 ds_grid_set(map, o+8, o-1, 4)
 ds_grid_set(map, o+8, o-0, 4)
 ds_grid_set(map, o+8, o+1, 4)
-ds_grid_set(map, o+2, o, 10)
+ds_grid_set(map, o+2, o, 11)
 ds_grid_set(map, o+6, o, 5)
 //buttons
+bshop = false
 start = false
 circle = false
 quit = false
