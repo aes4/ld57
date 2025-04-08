@@ -126,11 +126,14 @@ if nextstep {
 }
 if circle {
     oslidercircle.x = mouse_x
-    if 1300 < oslidercircle.x && oslidercircle.x < 2700 {
-        //vol = (oslidercircle.x - 1300) / (2700 - 1300)
-        //audio_sound_gain(aud, vol, 0)
+    if (2880/2) < oslidercircle.x && oslidercircle.x < 2780 {
+        vol = (oslidercircle.x - (2880/2)) / (2780 - (2880/2))
+        audio_sound_gain(a, vol, 0)
     }
     circle = false
+    if mouse_check_button_pressed(mb_left) && mouse_x > (2880/2) {
+        oslidercircle.x = mouse_x - ((2880/1.5)+92)
+    }
 }
 if start {
     //dvol = false
@@ -143,7 +146,7 @@ if start {
     start = false
 }
 if quit { game_end() }
-if keyboard_check(vk_escape) { game_end() }  // remove before final verison
+// if keyboard_check(vk_escape) { game_end() }  // remove before final verison
 /* some ld56 code
 if inc {
     vol += 0.1
@@ -253,9 +256,14 @@ if keyboard_check(ord("3")) {
 if keyboard_check(ord("4")) {
     invslot = "4"
 }
+
+if instance_exists(oslidercircle) {
+    if mouse_check_button_pressed(mb_left) && mouse_x > (2880/2) {
+        oslidercircle.x = mouse_x - ((2880/1.5)+92)
+    }
+}
 if currentblock == "None" and mouse_check_button_pressed(mb_left) and cursordistance(px, py) < (320 * 1.5) and invslot == "1" {
     currentblock = instance_position(mouse_x, mouse_y, odirt)
-    out(currentblock)
     if currentblock == noone {
         currentblock = instance_position(mouse_x, mouse_y, owire)
     } else {  // autoclicker here breaks the game
@@ -277,18 +285,19 @@ if currentblock != "None" {
             instance_destroy(currentblock)
             currentblock = "None"
         }
-        breaktimer = 60*0.5
+        breaktimer = 60*1
     }
 }
 if mouse_check_button_pressed(mb_left) && place_meeting(mouse_x, mouse_y, obdirt) && invslot == "2" and cursordistance(px, py) < (320 * 1.5) and idirt > 0 {
     idk = instance_position(mouse_x, mouse_y, obdirt)
     instance_create_layer(idk.x, idk.y, "Instances", obdirt)
 }
+if mouse_check_button_pressed(mb_left) && place_meeting(mouse_x, mouse_y, obdirt) && invslot == "3" {
+    clients += 1;
+}
 if mouse_check_button_pressed(mb_left) && invslot == "3" and cursordistance(px, py) < (320 * 1.5) and iwire > 0 {
     idk = instance_position(mouse_x, mouse_y, obdirt)
-    out(idk)
     if idk == -4 { idk = instance_position(mouse_x, mouse_y, obmet) }
-    out(idk)
     idkk = instance_create_layer(idk.x, idk.y, "Instances", owire)
     plsx = (idk.x - (px - o * 320)) div 320
     plsy = (idk.y - (py - o * 320)) div 320
@@ -326,22 +335,26 @@ if bshop == true {
     instance_create_layer(px-halfvpw, py-halfvpw, "Instances", obbuy4)
     bshop = false
 }
-// here it is the gold the gameplay the brain
-// find server and set it as main
 calctime -= 1
 if calctime < 0 {
-    for (i = 0; i < 17; i++) {
-        for (ii = 0; ii < 17; ii++) {
-            if ds_grid_get(map, i, ii) == 10 or ds_grid_get(map, i, ii) == 3 {
+    mon += clients * 15
+    calctime = (60*15)/10
+}
+/*
+calctime -= 1
+if calctime < 0 {
+    for (i = 0; i < mw; i++) {
+        for (ii = 0; ii < mw; ii++) {
+            if ds_grid_get(map, i, ii) == 11 {
                 mainx = i
                 mainy = ii
                 break
             }
         }
-        if mainx != "None" { break }
+        if mainx != -1 { break }
     }
-    walk = ds_grid_create(17, 17)
-    ds_grid_set_region(walk, 0, 0, 16, 16, 0)
+    walk = ds_grid_create(mw, mw)
+    ds_grid_set_region(walk, 0, 0, mw-1, mw-1, 0)
 
     thing = ds_list_create()
     ds_list_add(thing, mainx)
@@ -349,31 +362,88 @@ if calctime < 0 {
     clients = 0
 
     while(ds_list_size(thing) > 0) {
-        ii = ds_list_find_value(thing, ds_list_size(thing) - 1); ds_list_delete(thing, ds_list_size(thing) - 1)
-        i = ds_list_find_value(thing, ds_list_size(thing) - 1); ds_list_delete(thing, ds_list_size(thing) - 1)
-        if (i < 0 || ii < 0 || i >= 17 || ii >= 17) continue
-        if (ds_grid_get(walk, i, ii)) continue
-        ds_grid_set(walk, i, ii, 1)
-        tile = ds_grid_get(map, i, ii)
-        if tile == 0 continue
-        if tile == 9 { clients += 1 }
-        if tile == 2 or tile = 8 or tile == 11 {
-            ds_list_add(thing, i + 1)
-            ds_list_add(thing, ii)
-            ds_list_add(thing, i)
-            ds_list_add(thing, ii + 1)
-            ds_list_add(thing, ii)
-            ds_list_add(thing, i)
-            ds_list_add(thing, ii - 1)
+        fy = ds_list_find_value(thing, ds_list_size(thing) - 1)
+        fx = ds_list_find_value(thing, ds_list_size(thing) - 2)
+        ds_list_delete(thing, ds_list_size(thing) - 1)
+        ds_list_delete(thing, ds_list_size(thing) - 1)
+
+        if (fx < 0 || fy < 0 || fx >= mw || fy >= mw) {
+            continue
         }
+        if (ds_grid_get(walk, fx, fy)) {
+            continue
+        }
+        tile = ds_grid_get(map, fx, fy)
+
+
+        ds_grid_set(walk, fx, fy, 1)
+        if tile == 10 {
+            out("client found")
+            clients += 1
+            continue
+        }
+        if tile == 2 || tile == 9 || tile == 11 || tile == 10 {
+            ds_list_add(thing, fx+1); ds_list_add(thing, fy)
+            ds_list_add(thing, fx - 1); ds_list_add(thing, fy)
+            ds_list_add(thing, fx); ds_list_add(thing, fy + 1)
+            ds_list_add(thing, fx); ds_list_add(thing, fy - 1)
+        }
+    }
     ds_list_destroy(thing)
-    ds_list_destroy(walk)
+    ds_grid_destroy(walk)
     mon += clients * 15
-}
+    calctime = (60*15)/10
+    clients = 0
+}*/
 
 if keyboard_check(ord("E")) {
     // minimap
+    // was gonna be but now its jetpack
+    topdown()
 }
+
+function topdown(){  // need vars dir, vel, velstart, velcap, velinc
+    switch(keyboard_key){
+        case ord("W"):
+            if vel < velcap {
+                vel += velstart
+                vel *= velinc
+            }
+            py -= vel  // normally this is in a !place meeting check
+            dir = 0
+        break
+        case ord("S"):
+            if vel < velcap {
+                vel += velstart
+                vel *= velinc
+            }
+            py += vel  // normally this is in a !place meeting check
+            dir = 2
+            //sprite_index = splayerd
+        break
+        case ord("A"):
+            if vel < velcap {
+                vel += velstart
+                vel *= velinc
+            }
+            px -= vel  // normally this is in a !place meeting check
+            dir = 3
+            //sprite_index = splayerl
+        break
+        case ord("D"):
+            if vel < velcap {
+                vel += velstart
+                vel *= velinc
+            }
+            px += vel  // normally this is in a !place meeting check
+            dir = 1
+            //sprite_index = splayerr
+        break
+    }
+    oplr.x = px
+    oplr.y = py
+}
+
 if currentroom == "main" {
     side()
     oplr.x = px

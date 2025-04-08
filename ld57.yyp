@@ -97,6 +97,7 @@
     {"id":{"name":"main","path":"rooms/main/main.yy",},},
     {"id":{"name":"mm","path":"rooms/mm/mm.yy",},},
     {"id":{"name":"pre","path":"rooms/pre/pre.yy",},},
+    {"id":{"name":"alol","path":"sounds/alol/alol.yy",},},
     {"id":{"name":"sarrow","path":"sprites/sarrow/sarrow.yy",},},
     {"id":{"name":"sb","path":"sprites/sb/sb.yy",},},
     {"id":{"name":"sbbuy","path":"sprites/sbbuy/sbbuy.yy",},},
